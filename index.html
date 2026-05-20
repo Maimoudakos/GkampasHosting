@@ -13,7 +13,6 @@ body {
   color: white;
 }
 
-/* TOP BAR (Instagram style) */
 .topbar {
   height: 50px;
   display: flex;
@@ -27,19 +26,16 @@ body {
   z-index: 10;
 }
 
-/* FEED */
 .feed {
   max-width: 470px;
   margin: auto;
 }
 
-/* POST */
 .post {
   border-bottom: 1px solid #222;
   padding-bottom: 10px;
 }
 
-/* HEADER */
 .post-header {
   display: flex;
   align-items: center;
@@ -59,13 +55,11 @@ body {
   font-size: 14px;
 }
 
-/* IMAGE */
 .post img {
   width: 100%;
   display: block;
 }
 
-/* ACTION ROW (REAL INSTAGRAM STYLE) */
 .actions {
   display: flex;
   justify-content: space-between;
@@ -82,31 +76,41 @@ body {
   cursor: pointer;
 }
 
-/* LIKE COUNT */
 .likes {
   font-weight: 600;
   font-size: 14px;
   padding: 0 12px;
 }
 
-/* CAPTION */
 .caption {
   padding: 6px 12px;
   font-size: 14px;
 }
 
-.caption b {
-  margin-right: 5px;
+.comment-box {
+  padding: 8px 12px;
 }
 
-/* COMMENTS PREVIEW */
-.comment-preview {
-  padding: 0 12px;
+.comment {
   font-size: 13px;
-  opacity: 0.7;
+  opacity: 0.8;
+  margin-bottom: 4px;
 }
 
-/* LOGIN BUTTON */
+.comment-input {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+.comment-input input {
+  flex: 1;
+  padding: 6px;
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+}
+
 button {
   background: none;
   border: 1px solid #333;
@@ -149,7 +153,9 @@ import {
   onSnapshot,
   doc,
   updateDoc,
-  getDoc
+  getDoc,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -168,7 +174,6 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 
-/* AUTH */
 window.login = () => signInWithPopup(auth, provider);
 window.logout = () => signOut(auth);
 
@@ -201,54 +206,47 @@ onSnapshot(q, (snap) => {
     feed.innerHTML += `
       <div class="post">
 
-        <!-- HEADER -->
         <div class="post-header">
           <div class="avatar"></div>
           <div class="username">gkampas</div>
         </div>
 
-        <!-- IMAGE -->
         <img src="${post.image}">
 
-        <!-- ACTIONS -->
         <div class="actions">
           <div class="left-actions">
             <div class="icon" onclick="likePost('${id}')">
               ${liked ? "❤️" : "🤍"}
             </div>
-            <div class="icon">💬</div>
-            <div class="icon">📤</div>
+            <div class="icon" onclick="focusComment('${id}')">💬</div>
           </div>
-          <div class="icon">🔖</div>
         </div>
 
-        <!-- LIKES -->
         <div class="likes">${likeCount} likes</div>
 
-        <!-- CAPTION -->
         <div class="caption">
           <b>${post.title}</b> ${post.description}
         </div>
 
-        <!-- COMMENT PREVIEW -->
-        <div class="comment-preview">
-          View all comments
+        <div id="comments-${id}" class="comment-box"></div>
+
+        <div class="comment-input">
+          <input id="input-${id}" placeholder="Add a comment...">
+          <button onclick="sendComment('${id}')">Post</button>
         </div>
 
       </div>
     `;
 
+    loadComments(id);
   });
 
 });
 
-/* LIKE SYSTEM */
+/* LIKE SYSTEM (SAFE) */
 window.likePost = async (postId) => {
 
-  if (!currentUser) {
-    await signInWithPopup(auth, provider);
-    return;
-  }
+  if (!currentUser) return signInWithPopup(auth, provider);
 
   const ref = doc(db, "posts", postId);
   const snap = await getDoc(ref);
@@ -257,14 +255,53 @@ window.likePost = async (postId) => {
   const likes = data.likes || {};
   const uid = currentUser.uid;
 
-  if (likes[uid]) {
-    delete likes[uid];
-  } else {
-    likes[uid] = true;
-  }
+  if (likes[uid]) delete likes[uid];
+  else likes[uid] = true;
 
   await updateDoc(ref, { likes });
+};
 
+/* COMMENTS LOAD */
+function loadComments(postId) {
+
+  const q = query(collection(db, "posts", postId, "comments"), orderBy("createdAt", "desc"));
+
+  onSnapshot(q, (snap) => {
+
+    const box = document.getElementById(`comments-${postId}`);
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    snap.forEach(c => {
+      const data = c.data();
+      box.innerHTML += `
+        <div class="comment">
+          <b>${data.name}:</b> ${data.text}
+        </div>
+      `;
+    });
+
+  });
+
+}
+
+/* SEND COMMENT */
+window.sendComment = async (postId) => {
+
+  if (!currentUser) return signInWithPopup(auth, provider);
+
+  const input = document.getElementById(`input-${postId}`);
+
+  if (!input.value.trim()) return;
+
+  await addDoc(collection(db, "posts", postId, "comments"), {
+    name: currentUser.displayName,
+    text: input.value,
+    createdAt: serverTimestamp()
+  });
+
+  input.value = "";
 };
 
 </script>
