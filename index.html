@@ -13,13 +13,12 @@ body {
   color: white;
 }
 
-/* TOP BAR */
+/* TOPBAR */
 .topbar {
   position: sticky;
   top: 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   padding: 12px 16px;
   background: rgba(10,15,30,0.9);
   backdrop-filter: blur(12px);
@@ -35,13 +34,6 @@ body {
   cursor: pointer;
 }
 
-/* USER INFO */
-.user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
 /* FEED */
 .feed {
   max-width: 500px;
@@ -49,7 +41,7 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 20px;
 }
 
 /* POST */
@@ -60,24 +52,12 @@ body {
   border: 1px solid rgba(255,255,255,0.06);
 }
 
-.post-header {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  gap: 10px;
-}
-
-.avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background: gray;
-}
-
 .post img {
   width: 100%;
+  display: block;
 }
 
+/* ACTIONS */
 .actions {
   display: flex;
   gap: 12px;
@@ -96,38 +76,53 @@ body {
 
 .likes {
   font-weight: bold;
-  font-size: 14px;
-}
-
-.title {
-  font-weight: 600;
 }
 
 .desc {
   opacity: 0.7;
-  font-size: 14px;
 }
 
+/* UPLOAD */
+.upload {
+  max-width: 500px;
+  margin: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+.upload button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-
-  <div><b>Gkampas Social</b></div>
-
-  <div class="user" id="userBox">
+  <b>Gkampas Social</b>
+  <div id="userBox">
     <button onclick="login()">Login</button>
   </div>
-
 </div>
 
+<div id="uploadBox"></div>
 <div id="feed" class="feed"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
 import {
   getAuth,
   GoogleAuthProvider,
@@ -139,11 +134,14 @@ import {
 import {
   getFirestore,
   collection,
-  doc,
+  addDoc,
   query,
   orderBy,
   onSnapshot,
-  updateDoc
+  doc,
+  updateDoc,
+  serverTimestamp,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -162,27 +160,60 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 
-/* AUTH BUTTONS */
+/* AUTH */
 window.login = () => signInWithPopup(auth, provider);
 window.logout = () => signOut(auth);
 
-/* USER STATE UI */
+/* USER STATE */
 onAuthStateChanged(auth, (user) => {
 
   currentUser = user;
 
   const box = document.getElementById("userBox");
+  const uploadBox = document.getElementById("uploadBox");
 
   if (user) {
+
     box.innerHTML = `
       <span>${user.displayName}</span>
       <button onclick="logout()">Logout</button>
     `;
-  } else {
-    box.innerHTML = `<button onclick="login()">Login</button>`;
-  }
 
+    uploadBox.innerHTML = `
+      <div class="upload">
+        <input id="img" placeholder="Image URL">
+        <input id="title" placeholder="Title">
+        <input id="desc" placeholder="Description">
+        <button onclick="uploadPost()">Upload</button>
+      </div>
+    `;
+
+  } else {
+
+    box.innerHTML = `<button onclick="login()">Login</button>`;
+    uploadBox.innerHTML = "";
+
+  }
 });
+
+/* UPLOAD POST */
+window.uploadPost = async () => {
+
+  const img = document.getElementById("img").value;
+  const title = document.getElementById("title").value;
+  const desc = document.getElementById("desc").value;
+
+  if (!img) return;
+
+  await addDoc(collection(db, "posts"), {
+    image: img,
+    title,
+    description: desc,
+    likes: {},
+    createdAt: serverTimestamp()
+  });
+
+};
 
 /* FEED */
 const feed = document.getElementById("feed");
@@ -205,11 +236,6 @@ onSnapshot(q, (snap) => {
     feed.innerHTML += `
       <div class="post">
 
-        <div class="post-header">
-          <div class="avatar"></div>
-          <b>Gkampas</b>
-        </div>
-
         <img src="${post.image}">
 
         <div class="actions">
@@ -221,7 +247,7 @@ onSnapshot(q, (snap) => {
 
         <div class="content">
           <div class="likes">${count} likes</div>
-          <div class="title">${post.title}</div>
+          <b>${post.title}</b>
           <div class="desc">${post.description}</div>
         </div>
 
@@ -232,7 +258,7 @@ onSnapshot(q, (snap) => {
 
 });
 
-/* LIKE SYSTEM */
+/* LIKE (FIXED) */
 window.likePost = async (postId) => {
 
   if (!currentUser) {
@@ -242,7 +268,7 @@ window.likePost = async (postId) => {
 
   const ref = doc(db, "posts", postId);
 
-  const snap = await (await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js")).getDoc(ref);
+  const snap = await getDoc(ref);
   const data = snap.data();
 
   const likes = data.likes || {};
