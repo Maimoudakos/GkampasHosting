@@ -17,12 +17,29 @@ body {
 .topbar {
   position: sticky;
   top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
   background: rgba(10,15,30,0.9);
   backdrop-filter: blur(12px);
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.topbar button {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* USER INFO */
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* FEED */
@@ -35,7 +52,7 @@ body {
   gap: 25px;
 }
 
-/* POST CARD */
+/* POST */
 .post {
   background: rgba(255,255,255,0.04);
   border-radius: 18px;
@@ -43,7 +60,6 @@ body {
   border: 1px solid rgba(255,255,255,0.06);
 }
 
-/* HEADER */
 .post-header {
   display: flex;
   align-items: center;
@@ -58,13 +74,10 @@ body {
   background: gray;
 }
 
-/* IMAGE */
 .post img {
   width: 100%;
-  display: block;
 }
 
-/* ACTIONS */
 .actions {
   display: flex;
   gap: 12px;
@@ -74,12 +87,6 @@ body {
 
 .icon {
   cursor: pointer;
-  opacity: 0.9;
-  transition: 0.2s;
-}
-
-.icon:hover {
-  transform: scale(1.2);
 }
 
 /* CONTENT */
@@ -90,7 +97,6 @@ body {
 .likes {
   font-weight: bold;
   font-size: 14px;
-  margin-bottom: 5px;
 }
 
 .title {
@@ -102,46 +108,20 @@ body {
   font-size: 14px;
 }
 
-/* COMMENTS */
-.comment-box {
-  padding: 10px;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.comment {
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-/* INPUT */
-.comment-input {
-  display: flex;
-  border-top: 1px solid rgba(255,255,255,0.06);
-}
-
-.comment-input input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: white;
-}
-
-.comment-input button {
-  background: transparent;
-  border: none;
-  color: #4ea1ff;
-  padding: 10px;
-  cursor: pointer;
-}
 </style>
-
 </head>
 
 <body>
 
-<div class="topbar">Gkampas Social</div>
+<div class="topbar">
+
+  <div><b>Gkampas Social</b></div>
+
+  <div class="user" id="userBox">
+    <button onclick="login()">Login</button>
+  </div>
+
+</div>
 
 <div id="feed" class="feed"></div>
 
@@ -152,21 +132,18 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
 
 import {
   getFirestore,
   collection,
-  addDoc,
+  doc,
   query,
   orderBy,
   onSnapshot,
-  doc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  serverTimestamp
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -185,10 +162,29 @@ const provider = new GoogleAuthProvider();
 
 let currentUser = null;
 
+/* AUTH BUTTONS */
+window.login = () => signInWithPopup(auth, provider);
+window.logout = () => signOut(auth);
+
+/* USER STATE UI */
 onAuthStateChanged(auth, (user) => {
+
   currentUser = user;
+
+  const box = document.getElementById("userBox");
+
+  if (user) {
+    box.innerHTML = `
+      <span>${user.displayName}</span>
+      <button onclick="logout()">Logout</button>
+    `;
+  } else {
+    box.innerHTML = `<button onclick="login()">Login</button>`;
+  }
+
 });
 
+/* FEED */
 const feed = document.getElementById("feed");
 
 const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
@@ -203,8 +199,8 @@ onSnapshot(q, (snap) => {
     const id = d.id;
 
     const likes = post.likes || {};
-    const likeCount = Object.keys(likes).length;
-    const isLiked = currentUser && likes[currentUser.uid];
+    const count = Object.keys(likes).length;
+    const liked = currentUser && likes[currentUser.uid];
 
     feed.innerHTML += `
       <div class="post">
@@ -217,26 +213,26 @@ onSnapshot(q, (snap) => {
         <img src="${post.image}">
 
         <div class="actions">
-          <div class="icon" onclick="likePost('${id}')">
-            ${isLiked ? "❤️" : "🤍"}
-          </div>
-
-          <div class="icon">💬</div>
+          <span class="icon" onclick="likePost('${id}')">
+            ${liked ? "❤️" : "🤍"}
+          </span>
+          <span class="icon">💬</span>
         </div>
 
         <div class="content">
-          <div class="likes">${likeCount} likes</div>
+          <div class="likes">${count} likes</div>
           <div class="title">${post.title}</div>
           <div class="desc">${post.description}</div>
         </div>
 
       </div>
     `;
+
   });
 
 });
 
-/* LIKE SYSTEM (REAL USER BASED) */
+/* LIKE SYSTEM */
 window.likePost = async (postId) => {
 
   if (!currentUser) {
@@ -246,7 +242,7 @@ window.likePost = async (postId) => {
 
   const ref = doc(db, "posts", postId);
 
-  const snap = await getDoc(ref);
+  const snap = await (await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js")).getDoc(ref);
   const data = snap.data();
 
   const likes = data.likes || {};
