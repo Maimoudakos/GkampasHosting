@@ -92,6 +92,47 @@ footer {
   opacity: 0.5;
 }
 
+/* LOGIN */
+
+#userBox {
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+
+.login-btn,
+.user-info button {
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.login-btn:hover,
+.user-info button:hover {
+
+  background: rgba(255,255,255,0.15);
+
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
   .gallery {
@@ -114,6 +155,8 @@ footer {
 </head>
 
 <body>
+
+<div id="userBox"></div>
 
 <header>
   <h1>Γκαμπαερίδης Gallery</h1>
@@ -175,6 +218,94 @@ footer {
 <footer>
   © 2026 Γκαμπαερίδης Gallery • Μορφές Γκάμπα
 </footer>
+
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBUWEdDO4t0ej8Xbb4XRbnVHIPkNLGyc9c",
+  authDomain: "gkampasgallery.firebaseapp.com",
+  projectId: "gkampasgallery",
+  storageBucket: "gkampasgallery.firebasestorage.app",
+  messagingSenderId: "697722298225",
+  appId: "1:697722298225:web:e6ffc5ba7ea55744bb20d0",
+  measurementId: "G-X9MV0XYE2W"
+};
+
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+const auth = getAuth(app);
+
+const provider = new GoogleAuthProvider();
+
+
+// LOGIN
+window.login = async () => {
+
+  try {
+
+    await signInWithPopup(auth, provider);
+
+  } catch (err) {
+
+    console.error(err);
+
+  }
+
+};
+
+
+// LOGOUT
+window.logout = async () => {
+
+  await signOut(auth);
+
+};
+
+
+// USER STATE
+onAuthStateChanged(auth, (user) => {
+
+  const userBox = document.getElementById("userBox");
+
+  if (user) {
+
+    userBox.innerHTML = `
+      <div class="user-info">
+        <img src="${user.photoURL}">
+        <span>${user.displayName}</span>
+        <button onclick="logout()">Logout</button>
+      </div>
+    `;
+
+  } else {
+
+    userBox.innerHTML = `
+      <button class="login-btn" onclick="login()">
+        Sign in with Google
+      </button>
+    `;
+
+  }
+
+});
+
+</script>
+
 
 </body>
 </html>
