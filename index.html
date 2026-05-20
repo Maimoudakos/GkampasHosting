@@ -3,126 +3,136 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gkampas Social</title>
+<title>Social</title>
 
 <style>
 body {
   margin: 0;
-  font-family: system-ui;
-  background: #0a0f1e;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  background: #000;
   color: white;
 }
 
-/* TOPBAR */
+/* TOP BAR (Instagram style) */
 .topbar {
-  position: sticky;
-  top: 0;
+  height: 50px;
   display: flex;
   justify-content: space-between;
-  padding: 12px 16px;
-  background: rgba(10,15,30,0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-
-.topbar button {
-  background: rgba(255,255,255,0.08);
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  cursor: pointer;
+  align-items: center;
+  padding: 0 14px;
+  border-bottom: 1px solid #222;
+  position: sticky;
+  top: 0;
+  background: black;
+  z-index: 10;
 }
 
 /* FEED */
 .feed {
-  max-width: 500px;
+  max-width: 470px;
   margin: auto;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
 }
 
 /* POST */
 .post {
-  background: rgba(255,255,255,0.04);
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid #222;
+  padding-bottom: 10px;
 }
 
+/* HEADER */
+.post-header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* IMAGE */
 .post img {
   width: 100%;
   display: block;
 }
 
-/* ACTIONS */
+/* ACTION ROW (REAL INSTAGRAM STYLE) */
 .actions {
   display: flex;
-  gap: 12px;
-  padding: 10px;
-  font-size: 20px;
+  justify-content: space-between;
+  padding: 10px 12px 6px 12px;
+  font-size: 22px;
+}
+
+.left-actions {
+  display: flex;
+  gap: 14px;
 }
 
 .icon {
   cursor: pointer;
 }
 
-/* CONTENT */
-.content {
-  padding: 0 10px 10px;
-}
-
+/* LIKE COUNT */
 .likes {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 12px;
 }
 
-.desc {
+/* CAPTION */
+.caption {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.caption b {
+  margin-right: 5px;
+}
+
+/* COMMENTS PREVIEW */
+.comment-preview {
+  padding: 0 12px;
+  font-size: 13px;
   opacity: 0.7;
 }
 
-/* UPLOAD */
-.upload {
-  max-width: 500px;
-  margin: auto;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.upload input {
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-}
-
-.upload button {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
+/* LOGIN BUTTON */
+button {
+  background: none;
+  border: 1px solid #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
   cursor: pointer;
 }
 </style>
+
 </head>
 
 <body>
 
 <div class="topbar">
-  <b>Gkampas Social</b>
+  <b>Instagram</b>
   <div id="userBox">
     <button onclick="login()">Login</button>
   </div>
 </div>
 
-<div id="uploadBox"></div>
 <div id="feed" class="feed"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-
 import {
   getAuth,
   GoogleAuthProvider,
@@ -134,13 +144,11 @@ import {
 import {
   getFirestore,
   collection,
-  addDoc,
   query,
   orderBy,
   onSnapshot,
   doc,
   updateDoc,
-  serverTimestamp,
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
@@ -164,56 +172,13 @@ let currentUser = null;
 window.login = () => signInWithPopup(auth, provider);
 window.logout = () => signOut(auth);
 
-/* USER STATE */
 onAuthStateChanged(auth, (user) => {
-
   currentUser = user;
 
-  const box = document.getElementById("userBox");
-  const uploadBox = document.getElementById("uploadBox");
-
-  if (user) {
-
-    box.innerHTML = `
-      <span>${user.displayName}</span>
-      <button onclick="logout()">Logout</button>
-    `;
-
-    uploadBox.innerHTML = `
-      <div class="upload">
-        <input id="img" placeholder="Image URL">
-        <input id="title" placeholder="Title">
-        <input id="desc" placeholder="Description">
-        <button onclick="uploadPost()">Upload</button>
-      </div>
-    `;
-
-  } else {
-
-    box.innerHTML = `<button onclick="login()">Login</button>`;
-    uploadBox.innerHTML = "";
-
-  }
+  document.getElementById("userBox").innerHTML = user
+    ? `<button onclick="logout()">Logout</button>`
+    : `<button onclick="login()">Login</button>`;
 });
-
-/* UPLOAD POST */
-window.uploadPost = async () => {
-
-  const img = document.getElementById("img").value;
-  const title = document.getElementById("title").value;
-  const desc = document.getElementById("desc").value;
-
-  if (!img) return;
-
-  await addDoc(collection(db, "posts"), {
-    image: img,
-    title,
-    description: desc,
-    likes: {},
-    createdAt: serverTimestamp()
-  });
-
-};
 
 /* FEED */
 const feed = document.getElementById("feed");
@@ -230,25 +195,44 @@ onSnapshot(q, (snap) => {
     const id = d.id;
 
     const likes = post.likes || {};
-    const count = Object.keys(likes).length;
+    const likeCount = Object.keys(likes).length;
     const liked = currentUser && likes[currentUser.uid];
 
     feed.innerHTML += `
       <div class="post">
 
-        <img src="${post.image}">
-
-        <div class="actions">
-          <span class="icon" onclick="likePost('${id}')">
-            ${liked ? "❤️" : "🤍"}
-          </span>
-          <span class="icon">💬</span>
+        <!-- HEADER -->
+        <div class="post-header">
+          <div class="avatar"></div>
+          <div class="username">gkampas</div>
         </div>
 
-        <div class="content">
-          <div class="likes">${count} likes</div>
-          <b>${post.title}</b>
-          <div class="desc">${post.description}</div>
+        <!-- IMAGE -->
+        <img src="${post.image}">
+
+        <!-- ACTIONS -->
+        <div class="actions">
+          <div class="left-actions">
+            <div class="icon" onclick="likePost('${id}')">
+              ${liked ? "❤️" : "🤍"}
+            </div>
+            <div class="icon">💬</div>
+            <div class="icon">📤</div>
+          </div>
+          <div class="icon">🔖</div>
+        </div>
+
+        <!-- LIKES -->
+        <div class="likes">${likeCount} likes</div>
+
+        <!-- CAPTION -->
+        <div class="caption">
+          <b>${post.title}</b> ${post.description}
+        </div>
+
+        <!-- COMMENT PREVIEW -->
+        <div class="comment-preview">
+          View all comments
         </div>
 
       </div>
@@ -258,7 +242,7 @@ onSnapshot(q, (snap) => {
 
 });
 
-/* LIKE (FIXED) */
+/* LIKE SYSTEM */
 window.likePost = async (postId) => {
 
   if (!currentUser) {
@@ -267,10 +251,9 @@ window.likePost = async (postId) => {
   }
 
   const ref = doc(db, "posts", postId);
-
   const snap = await getDoc(ref);
-  const data = snap.data();
 
+  const data = snap.data();
   const likes = data.likes || {};
   const uid = currentUser.uid;
 
