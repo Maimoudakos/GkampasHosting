@@ -132,6 +132,13 @@ button {
   </div>
 </div>
 
+<div style="max-width:470px;margin:auto;padding:10px;">
+  <input id="img" placeholder="Image URL" style="width:100%;padding:8px;">
+  <input id="title" placeholder="Title" style="width:100%;padding:8px;margin-top:5px;">
+  <input id="desc" placeholder="Description" style="width:100%;padding:8px;margin-top:5px;">
+  <button onclick="uploadPost()" style="margin-top:5px;">Post</button>
+</div>
+
 <div id="feed" class="feed"></div>
 
 <script type="module">
@@ -157,6 +164,8 @@ import {
   addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+import { addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBUWEdDO4t0ej8Xbb4XRbnVHIPkNLGyc9c",
@@ -208,7 +217,7 @@ onSnapshot(q, (snap) => {
 
         <div class="post-header">
           <div class="avatar"></div>
-          <div class="username">gkampas</div>
+          <div class="username">${post.userName || "unknown"}</div>
         </div>
 
         <img src="${post.image}">
@@ -242,6 +251,30 @@ onSnapshot(q, (snap) => {
   });
 
 });
+
+window.uploadPost = async () => {
+
+  if (!currentUser) {
+    await signInWithPopup(auth, provider);
+    return;
+  }
+
+  const img = document.getElementById("img").value;
+  const title = document.getElementById("title").value;
+  const desc = document.getElementById("desc").value;
+
+  if (!img) return;
+
+  await addDoc(collection(db, "posts"), {
+    image: img,
+    title: title,
+    description: desc,
+    userName: currentUser.displayName,
+    createdAt: serverTimestamp(),
+    likes: {}
+  });
+
+};
 
 /* LIKE SYSTEM (SAFE) */
 window.likePost = async (postId) => {
