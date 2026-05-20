@@ -3,219 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="images/image2.jpg">
-<title>Συλλογή Γκαμπαερίδη</title>
+<title>Instagram Style Gallery</title>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
 body {
-  background: radial-gradient(circle at top, #111827, #05070f);
+  margin: 0;
+  font-family: Arial;
+  background: #0b0f1a;
   color: white;
-  min-height: 100vh;
 }
 
 /* HEADER */
 header {
   text-align: center;
-  padding: 60px 20px 30px;
+  padding: 30px;
 }
 
-header h1 {
-  font-size: 3rem;
-  letter-spacing: 2px;
-}
-
-header p {
-  opacity: 0.6;
-  margin-top: 10px;
-}
-
-/* GALLERY GRID */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding: 40px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-/* CARD */
-.card {
-  background: rgba(255,255,255,0.05);
-  border-radius: 15px;
-  overflow: hidden;
-  backdrop-filter: blur(10px);
-  transition: 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.08);
-}
-
-.card:hover {
-  transform: translateY(-8px);
-  border-color: rgba(255,255,255,0.2);
-}
-
-/* IMAGE */
-.card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  display: block;
-}
-
-/* TEXT */
-.card-content {
-  padding: 15px;
-}
-
-.card-content h3 {
-  margin-bottom: 8px;
-  font-size: 1.2rem;
-}
-
-.card-content p {
-  font-size: 0.9rem;
-  opacity: 0.7;
-  line-height: 1.4;
-}
-
-/* FOOTER */
-footer {
-  text-align: center;
-  padding: 40px;
-  opacity: 0.5;
-}
-
-/* LOGIN */
-
+/* USER */
 #userBox {
   display: flex;
   justify-content: center;
-  padding-top: 20px;
+  padding: 10px;
 }
 
-.login-btn,
-.user-info button {
-
+.user-info, .login-btn {
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: none;
   color: white;
-  padding: 12px 18px;
-  border-radius: 12px;
   cursor: pointer;
-  transition: 0.3s ease;
-  backdrop-filter: blur(10px);
 }
 
-.login-btn:hover,
-.user-info button:hover {
-
-  background: rgba(255,255,255,0.15);
-
-}
-
-.user-info {
+/* UPLOAD */
+.upload {
+  max-width: 600px;
+  margin: auto;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
 }
 
-.user-info img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
+.upload input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
 }
 
-.comments-section {
-  max-width: 900px;
-  margin: 60px auto;
+/* FEED */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  max-width: 600px;
+  margin: auto;
   padding: 20px;
 }
 
-.comments-section h2 {
-  margin-bottom: 20px;
-  font-size: 2rem;
+/* POST */
+.post {
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  overflow: hidden;
 }
 
-.comment-form {
+/* IMAGE WRAPPER */
+.post-media {
+  position: relative;
+}
+
+.post img {
+  width: 100%;
+  display: block;
+}
+
+/* ICONS OVERLAY */
+.post-icons {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
   display: flex;
   gap: 10px;
-  margin-bottom: 25px;
 }
 
-.comment-form input {
-  flex: 1;
-  padding: 14px;
-  border-radius: 12px;
-  border: none;
-  background: rgba(255,255,255,0.08);
-  color: white;
-  outline: none;
-}
-
-.comment-form button {
-  padding: 14px 18px;
-  border: none;
+.icon {
+  background: rgba(0,0,0,0.6);
+  padding: 8px 10px;
   border-radius: 12px;
   cursor: pointer;
-  background: rgba(255,255,255,0.12);
-  color: white;
-  transition: 0.3s;
+  font-size: 16px;
+  transition: 0.2s;
+  user-select: none;
 }
 
-.comment-form button:hover {
-  background: rgba(255,255,255,0.2);
+.icon:hover {
+  transform: scale(1.1);
 }
 
-.comment {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-  background: rgba(255,255,255,0.05);
-  padding: 15px;
-  border-radius: 15px;
+/* CONTENT */
+.post-content {
+  padding: 10px;
 }
 
-.comment img {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-}
-
-.comment-content h4 {
+.likes {
+  font-size: 14px;
+  opacity: 0.8;
   margin-bottom: 5px;
 }
 
-.comment-content p {
+/* COMMENTS */
+.comment {
+  font-size: 14px;
   opacity: 0.8;
+  margin: 5px 0;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  .gallery {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.comment-input {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
 }
 
-@media (max-width: 600px) {
-  .gallery {
-    grid-template-columns: 1fr;
-    padding: 20px;
-  }
-
-  header h1 {
-    font-size: 2rem;
-  }
+.comment-input input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
 }
+
+.comment-input button {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 </style>
-
 </head>
 
 <body>
@@ -223,81 +147,16 @@ footer {
 <div id="userBox"></div>
 
 <header>
-  <h1>Γκαμπαερίδης Gallery</h1>
-  <p>Μια συλλογή γεμάτη αγάπη, γέλιο, και νεύρα i guess</p>
+  <h1>Instagram Style Feed</h1>
 </header>
 
-<section class="comments-section">
+<div id="uploadBox"></div>
 
-  <h2>Comments</h2>
-
-  <div id="commentForm"></div>
-
-  <div id="commentsContainer"></div>
-
-</section>
-
-<section class="gallery">
-
-  <div class="card">
-    <img src="images/image1.jpg" alt="">
-    <div class="card-content">
-      <h3>Κουρασμένος Γκάμπας</h3>
-      <p>Εδώ το μικρό μας μοσχαράκι είναι έτοιμο να κοιμηθεί κουρασμένο.</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="images/image2.jpg" alt="">
-    <div class="card-content">
-      <h3>Σοβαρός/Πατέρας Γκάμπας</h3>
-      <p>Εδώ είναι η 40χρονη έκδοση του, με το γυαλί έτοιμος να πάρει τα παιδία του από τον παιδότοπο.</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="images/image3.jpg" alt="">
-    <div class="card-content">
-      <h3>Χαβαγιανέζος Γκάμπας</h3>
-      <p>Έτοιμος για χαβάη εδώ το αγόρι μας, περιμένει το αεροπλάνο.</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="images/image4.webp" alt="">
-    <div class="card-content">
-      <h3>Απειλιτικός Γκάμπας</h3>
-      <p>Εδώ το αγοράκι μας μόλις έχει τελειώσει από κάτι 🤭 και τον τραβάνε φωτογραφία εκείνη την στιγμή.</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="images/image5.jpg" alt="">
-    <div class="card-content">
-      <h3>Θείος Γκάμπας</h3>
-      <p>Εδώ το παλικάρι μας, ο θείος κοιτάει σαν 40χρονος ο οποίος τώρα μαθαίνει να χρησιμοποιεί κινητή συσκευή.</p>
-    </div>
-  </div>
-
-  <div class="card">
-    <img src="images/image6.jpg" alt="">
-    <div class="card-content">
-      <h3>Νεανικός Γκάμπας</h3>
-      <p>Εδώ με το φρυδάκι πάνω μας κοιτάει με ένα βλέμμα σαγινευτικό, ποιά κοπέλα μπορεί να αντισταθεί 🤔.</p>
-    </div>
-  </div>
-
-</section>
-
-<footer>
-  © 2026 Γκαμπαερίδης Gallery • Μορφές Γκάμπα
-</footer>
-
+<div class="feed" id="feed"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-
 import {
   getAuth,
   GoogleAuthProvider,
@@ -313,180 +172,182 @@ import {
   query,
   orderBy,
   onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-
-// Firebase config
+/* FIREBASE */
 const firebaseConfig = {
   apiKey: "AIzaSyBUWEdDO4t0ej8Xbb4XRbnVHIPkNLGyc9c",
   authDomain: "gkampasgallery.firebaseapp.com",
   projectId: "gkampasgallery",
   storageBucket: "gkampasgallery.firebasestorage.app",
   messagingSenderId: "697722298225",
-  appId: "1:697722298225:web:e6ffc5ba7ea55744bb20d0",
-  measurementId: "G-X9MV0XYE2W"
+  appId: "1:697722298225:web:e6ffc5ba7ea55744bb20d0"
 };
 
-
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
-
 const provider = new GoogleAuthProvider();
 
+/* AUTH */
+window.login = () => signInWithPopup(auth, provider);
+window.logout = () => signOut(auth);
 
-// LOGIN
-window.login = async () => {
-
-  try {
-
-    await signInWithPopup(auth, provider);
-
-  } catch (err) {
-
-    console.error(err);
-
-  }
-
-};
-
-
-// LOGOUT
-window.logout = async () => {
-
-  await signOut(auth);
-
-};
-
-
-// USER STATE
+/* USER UI */
 onAuthStateChanged(auth, (user) => {
 
-  const userBox = document.getElementById("userBox");
+  const box = document.getElementById("userBox");
 
   if (user) {
-
-    userBox.innerHTML = `
+    box.innerHTML = `
       <div class="user-info">
-        <img src="${user.photoURL}">
         <span>${user.displayName}</span>
         <button onclick="logout()">Logout</button>
       </div>
     `;
 
-  } else {
-
-    userBox.innerHTML = `
-      <button class="login-btn" onclick="login()">
-        Sign in with Google
-      </button>
+    document.getElementById("uploadBox").innerHTML = `
+      <div class="upload">
+        <input id="img" placeholder="Image URL">
+        <input id="title" placeholder="Title">
+        <input id="desc" placeholder="Description">
+        <button onclick="uploadPost()">Upload</button>
+      </div>
     `;
-
+  } else {
+    box.innerHTML = `<button class="login-btn" onclick="login()">Sign in with Google</button>`;
   }
-
 });
 
-const commentsContainer = document.getElementById("commentsContainer");
-const commentForm = document.getElementById("commentForm");
+/* UPLOAD */
+window.uploadPost = async () => {
+  const img = document.getElementById("img").value;
+  const title = document.getElementById("title").value;
+  const desc = document.getElementById("desc").value;
 
+  await addDoc(collection(db, "posts"), {
+    image: img,
+    title,
+    description: desc,
+    likes: 0,
+    createdAt: serverTimestamp()
+  });
+};
 
-// LOAD COMMENTS LIVE
-const q = query(
-  collection(db, "comments"),
-  orderBy("createdAt", "desc")
-);
+/* LOAD FEED */
+const feed = document.getElementById("feed");
 
-onSnapshot(q, (snapshot) => {
+const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
 
-  commentsContainer.innerHTML = "";
+onSnapshot(q, (snap) => {
 
-  snapshot.forEach((doc) => {
+  feed.innerHTML = "";
 
-    const data = doc.data();
+  snap.forEach((d) => {
 
-    commentsContainer.innerHTML += `
-      <div class="comment">
+    const post = d.data();
+    const postId = d.id;
 
-        <img src="${data.photoURL}">
+    feed.innerHTML += `
+      <div class="post">
 
-        <div class="comment-content">
-          <h4>${data.username}</h4>
-          <p>${data.text}</p>
+        <div class="post-media">
+
+          <img src="${post.image}">
+
+          <div class="post-icons">
+
+            <div class="icon" onclick="likePost('${postId}')">❤️</div>
+
+            <div class="icon" onclick="scrollToComments('${postId}')">💬</div>
+
+          </div>
+
+        </div>
+
+        <div class="post-content">
+
+          <div class="likes">❤️ ${post.likes || 0} likes</div>
+
+          <b>${post.title}</b>
+          <p>${post.description}</p>
+
+          <div id="comments-${postId}"></div>
+
+          <div class="comment-input">
+            <input id="input-${postId}" placeholder="Write comment...">
+            <button onclick="comment('${postId}')">Send</button>
+          </div>
+
         </div>
 
       </div>
     `;
 
+    loadComments(postId);
+  });
+});
+
+/* LIKE */
+window.likePost = async (postId) => {
+  const ref = doc(db, "posts", postId);
+  await updateDoc(ref, {
+    likes: increment(1)
+  });
+};
+
+/* COMMENTS */
+function loadComments(postId) {
+
+  const ref = collection(db, "posts", postId, "comments");
+
+  onSnapshot(ref, (snap) => {
+
+    const box = document.getElementById(`comments-${postId}`);
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    snap.forEach((c) => {
+      box.innerHTML += `
+        <div class="comment">
+          <b>${c.data().name}</b>: ${c.data().text}
+        </div>
+      `;
+    });
+
   });
 
-});
+}
 
-
-// COMMENT FORM WHEN LOGGED IN
-onAuthStateChanged(auth, (user) => {
-
-  if (user) {
-
-    commentForm.innerHTML = `
-      <div class="comment-form">
-
-        <input
-          id="commentInput"
-          type="text"
-          placeholder="Write a comment..."
-        >
-
-        <button onclick="postComment()">
-          Post
-        </button>
-
-      </div>
-    `;
-
-  } else {
-
-    commentForm.innerHTML = `
-      <p style="opacity:0.6">
-        Sign in to comment
-      </p>
-    `;
-
-  }
-
-});
-
-
-// POST COMMENT
-window.postComment = async () => {
+/* COMMENT */
+window.comment = async (postId) => {
 
   const user = auth.currentUser;
-
   if (!user) return;
 
-  const input = document.getElementById("commentInput");
+  const input = document.getElementById(`input-${postId}`);
 
-  if (!input.value.trim()) return;
-
-  await addDoc(collection(db, "comments"), {
-
-    username: user.displayName,
-    photoURL: user.photoURL,
-    text: input.value,
-
-    createdAt: serverTimestamp()
-
+  await addDoc(collection(db, "posts", postId, "comments"), {
+    name: user.displayName,
+    text: input.value
   });
 
   input.value = "";
+};
 
+/* SCROLL */
+window.scrollToComments = (postId) => {
+  document.getElementById(`comments-${postId}`).scrollIntoView({
+    behavior: "smooth"
+  });
 };
 
 </script>
-
 
 </body>
 </html>
